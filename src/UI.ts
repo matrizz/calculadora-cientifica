@@ -20,8 +20,8 @@ export class UI {
             "7", "8", "9", "/",
             "4", "5", "6", "*",
             "1", "2", "3", "-",
-            "0", ".", "=", "+",
-            "C", "⌫", "(", ")",
+            "0", ".",",", "=", "+",
+            "C", "(", ")","⌫"
         ];
 
         buttons.forEach(btn => {
@@ -45,6 +45,7 @@ export class UI {
             { label: "tg x", format: "tan(" },
             { label: "sec x", format: "sec(" },
             { label: "cotg x", format: "cot(" },
+            { label: "cosec x", format: "cosc(" },
             { label: "eˣ", format: "e^(" },
             { label: "ln x", format: "ln(" },
             { label: "rad x", format: "rad(" },

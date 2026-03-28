@@ -14,10 +14,13 @@ export class Calculator {
         "sin(": x => this.autoConvert ? this.op.sin(this.op.toRad(x)) : this.op.sin(x),
         "cos(": x => this.autoConvert ? this.op.cos(this.op.toRad(x)) : this.op.cos(x),
         "tan(": x => this.autoConvert ? this.op.tan(this.op.toRad(x)) : this.op.tan(x),
-        "ln(": x => Math.log(x),
-        "e^(": x => Math.exp(x),
-        "ⁿ√(": (n, x) => this.op.sqrtN(x, 1 / n),
+        "ln(": x => this.op.ln(x),
+        "e^(": x => this.op.exp(x),
+        "ⁿ√(": (n, x) => this.op.sqrtN(x, n),
         "^(": (x, n) => this.op.pow(x, n),
+        "cot(": (x) => null,
+        "sec(": (x) => null,
+        "cosc(": (x) => null,
     };
 
     public lastCommand: string = "";
@@ -51,7 +54,9 @@ export class Calculator {
 
         try {
             this.sanitize();
+            console.log(this.current)
             this.current = this.resolve(this.current);
+            console.log(this.current)
             this.current = eval(this.current).toString();
         } catch (err) {
             this.current = "Erro";
@@ -70,14 +75,14 @@ export class Calculator {
     }
 
     resolve(expr: string): string {
-        const patterns = Object.keys(this.fns);
+        const patterns = Object.keys(this.fns)
+            .sort((a, b) => b.length - a.length);
 
         while (true) {
             let found = false;
 
             for (const p of patterns) {
                 const idx = expr.lastIndexOf(p);
-                console.log(idx)
                 if (idx === -1) continue;
 
                 const start = idx + p.length;
@@ -97,9 +102,37 @@ export class Calculator {
                 const inside = expr.slice(start, i);
                 const value = this.resolve(inside);
 
-                let result
+                let result;
                 const fn = this.fns[p];
-                if (fn) result = fn(Number(value));
+
+                if (p === "^(") {
+                    let left = "";
+                    let j = idx - 1;
+
+                    while (j >= 0 && /[0-9.]/.test(expr[j]!)) {
+                        left = expr[j] + left;
+                        j--;
+                    }
+
+                    if (!left) throw new Error("Base inválida");
+
+                    const base = Number(left);
+                    const exponent = Number(value);
+
+                    result = this.op.pow(base, exponent);
+                    expr =
+                        expr.slice(0, j + 1) +
+                        result +
+                        expr.slice(i + 1);
+
+                    found = true;
+                    break;
+                }
+
+                if (fn) {
+                    const args = value.split(',').map(v => Number(v.trim()));
+                    result = fn(...args);
+                }
 
                 expr =
                     expr.slice(0, idx) +
@@ -143,7 +176,8 @@ export class Calculator {
     disableKeyboard(): void {
         this.useKeyboard = false
         this.display.disabled = !this.useKeyboard
-        this.display.removeEventListener('change', () => { })
+        this.display.removeEventListener('change', () => {})
+        this.display.removeEventListener('keypress', () => {})
     }
 
     enableAutoConvert() {

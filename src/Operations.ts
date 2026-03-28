@@ -116,4 +116,8 @@ export class Operations {
     toRad(degrees: number) {
         return degrees * (Math.PI / 180);
     }
+
+    sec() { /* TO-DO */ }
+    cosec() { /* TO-DO */ }
+    cotg() { /* TO-DO */ }
 }
